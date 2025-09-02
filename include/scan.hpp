@@ -2,23 +2,14 @@
 
 #include "parse.hpp"
 #include "types.hpp"
-#include <charconv>
 #include <tuple>
 #include <utility>
 
 namespace stdx {
 template <typename T>
 T process_single_value(std::string_view format, std::string_view input) {
-    T result{};
-    auto [ptr, ec] = std::from_chars(input.data(), input.data() + input.size(), result);
-    if (ec == std::errc()) {
-        std::cout << "Successfully converted: " << result << std::endl;
-    } else if (ec == std::errc::invalid_argument) {
-        std::cout << "Invalid argument: not a number." << std::endl;
-    } else if (ec == std::errc::result_out_of_range) {
-        std::cout << "Result out of range for int." << std::endl;
-    }
-    return static_cast<T>(result);
+    auto result = details::parse_value_with_format<T>(input, format);
+    return *result;
 }
 
 template <typename... Ts, size_t... I>

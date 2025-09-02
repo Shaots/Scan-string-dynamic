@@ -4,18 +4,45 @@
 #include <expected>
 #include <iostream>
 #include <string_view>
+#include <type_traits>
 #include <utility>
 #include <vector>
 
 namespace stdx::details {
 
-// здесь ваш код
+template <typename T>
+bool check_type(std::string_view fmt) {
+    if (fmt == "\%d") {
+        return std::is_integral<T>::value;
+    }
+    if (fmt == "\%s") {
+        return std::is_same_v<T, std::string>;
+    }
+    if (fmt == "\%u") {
+        return std::is_integral<T>::value && std::is_unsigned<T>::value;
+    }
+    if (fmt == "\%f") {
+        return std::is_floating_point<T>::value;
+    }
 
-// Функция для парсинга значения с учетом спецификатора формата
+    return false;
+}
+
 template <typename T>
 std::expected<T, scan_error> parse_value_with_format(std::string_view input, std::string_view fmt) {
-    std::cout << input << " " << fmt << std::endl;
-    return static_cast<T>(input);
+    if (check_type<T>(fmt)) {
+        T result{};
+        auto [ptr, ec] = std::from_chars(input.data(), input.data() + input.size(), result);
+        if (ec == std::errc()) {
+            std::cout << "Successfully converted: " << result << std::endl;
+        } else if (ec == std::errc::invalid_argument) {
+            std::cout << "Invalid argument: not a number." << std::endl;
+        } else if (ec == std::errc::result_out_of_range) {
+            std::cout << "Result out of range for int." << std::endl;
+        }
+        return static_cast<T>(result);
+    }
+    return std::unexpected(scan_error{"Unsupported type"});
 }
 
 // Функция для проверки корректности входных данных и выделения из обеих строк интересующих данных для парсинга
