@@ -1,12 +1,11 @@
 #pragma once
 
+#include "types.hpp"
 #include <expected>
-#include <string>
+#include <iostream>
 #include <string_view>
 #include <utility>
 #include <vector>
-
-#include "types.hpp"
 
 namespace stdx::details {
 
@@ -15,7 +14,8 @@ namespace stdx::details {
 // Функция для парсинга значения с учетом спецификатора формата
 template <typename T>
 std::expected<T, scan_error> parse_value_with_format(std::string_view input, std::string_view fmt) {
-    // здесь ваш код
+    std::cout << input << " " << fmt << std::endl;
+    return static_cast<T>(input);
 }
 
 // Функция для проверки корректности входных данных и выделения из обеих строк интересующих данных для парсинга
@@ -70,4 +70,4 @@ parse_sources(std::string_view input, std::string_view format) {
     return std::pair{format_parts, input_parts};
 }
 
-} // namespace stdx::details
+}  // namespace stdx::details

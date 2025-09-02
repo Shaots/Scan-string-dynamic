@@ -17,4 +17,4 @@ struct scan_result {
     void value();
 };
 
-} // namespace stdx::details
+}  // namespace stdx::details
