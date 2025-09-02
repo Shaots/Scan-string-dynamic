@@ -1,22 +1,57 @@
 #pragma once
 
 #include "types.hpp"
+#include <exception>
 #include <expected>
-#include <iostream>
 #include <string_view>
 #include <type_traits>
-#include <utility>
 #include <vector>
 
 namespace stdx::details {
 
 template <typename T>
-bool check_type(std::string_view fmt) {
+std::expected<T, scan_error> parse_number(std::string_view input) {
+    T result{};
+    auto [ptr, ec] = std::from_chars(input.data(), input.data() + input.size(), result);
+    if (ec == std::errc::invalid_argument) {
+        return std::unexpected(scan_error{err_msg::Err_invalid_arg});
+    }
+    if (ec == std::errc::result_out_of_range) {
+        return std::unexpected(scan_error{err_msg::Err_out_range});
+    }
+    return static_cast<T>(result);
+}
+
+template <typename T>
+requires(std::is_integral<T>::value &&std::is_signed<T>::value) std::expected<T, scan_error> parse_value(
+    std::string_view input) {
+    return parse_number<T>(input);
+}
+
+template <typename T>
+requires(std::is_integral<T>::value &&std::is_unsigned<T>::value) std::expected<T, scan_error> parse_value(
+    std::string_view input) {
+    return parse_number<T>(input);
+}
+
+template <typename T>
+requires(std::is_floating_point<T>::value) std::expected<T, scan_error> parse_value(std::string_view input) {
+    return parse_number<T>(input);
+}
+
+template <typename T>
+requires(std::is_same_v<T, std::string> ||
+         std::is_same_v<T, std::string_view>) std::expected<T, scan_error> parse_value(std::string_view input) {
+    return T{input};
+}
+
+template <typename T>
+bool check_format(std::string_view fmt) {
     if (fmt == "\%d") {
         return std::is_integral<T>::value;
     }
     if (fmt == "\%s") {
-        return std::is_same_v<T, std::string>;
+        return std::is_same_v<T, std::string> || std::is_same_v<T, std::string_view>;
     }
     if (fmt == "\%u") {
         return std::is_integral<T>::value && std::is_unsigned<T>::value;
@@ -30,19 +65,10 @@ bool check_type(std::string_view fmt) {
 
 template <typename T>
 std::expected<T, scan_error> parse_value_with_format(std::string_view input, std::string_view fmt) {
-    if (check_type<T>(fmt)) {
-        T result{};
-        auto [ptr, ec] = std::from_chars(input.data(), input.data() + input.size(), result);
-        if (ec == std::errc()) {
-            std::cout << "Successfully converted: " << result << std::endl;
-        } else if (ec == std::errc::invalid_argument) {
-            std::cout << "Invalid argument: not a number." << std::endl;
-        } else if (ec == std::errc::result_out_of_range) {
-            std::cout << "Result out of range for int." << std::endl;
-        }
-        return static_cast<T>(result);
+    if (!check_format<T>(fmt)) {
+        return std::unexpected(scan_error{err_msg::Err_format});
     }
-    return std::unexpected(scan_error{"Unsupported type"});
+    return parse_value<T>(input);
 }
 
 // Функция для проверки корректности входных данных и выделения из обеих строк интересующих данных для парсинга

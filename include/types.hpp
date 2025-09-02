@@ -17,4 +17,10 @@ struct scan_result {
     void value();
 };
 
+namespace err_msg {
+const char *Err_format = "Unsupported format\0";
+const char *Err_invalid_arg = "Invalid arguments\0";
+const char *Err_out_range = "Result out of the range\0";
+}  // namespace err_msg
+
 }  // namespace stdx::details
