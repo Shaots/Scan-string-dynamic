@@ -21,6 +21,8 @@ namespace err_msg {
 const char *Err_format = "Incorrect format\0";
 const char *Err_invalid_arg = "Invalid arguments\0";
 const char *Err_out_range = "Result out of the range\0";
+const char *Err_unmatched = "Formatted string does not match source string\0";
+const char *Err_exist_error = "Scan error exists in tuple\0";
 }  // namespace err_msg
 
 }  // namespace stdx::details
