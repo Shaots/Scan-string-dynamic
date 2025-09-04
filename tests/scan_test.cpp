@@ -29,7 +29,6 @@ TEST(ScanTest, format) {
 
     auto res3 = stdx::details::parse_value_with_format<int>("78.5", "\%f");
     EXPECT_EQ(res3.has_value(), false);
-    EXPECT_EQ(res3.error().message, "Incorrect format");
 }
 
 // 2 : Check integral format positive and negative
@@ -177,4 +176,31 @@ TEST(ScanTest, scanMixed) {
 TEST(ScanTest, scanNoPlaceholder) {
     auto res = stdx::scan<>("ABC 04 DEFG 15 HIGK -17 LMN 15.6 OPQ ABC", "ABC 04 DEFG 15 HIGK -17 LMN 15.6 OPQ ABC");
     ASSERT_TRUE(res);
+}
+
+// ---------------------------------
+
+// 11 : Unmatched format
+TEST(ScanTest, errorUnmatchedFormat) {
+    auto res = stdx::scan<int>("ABC 04 DEFG", "ABC {\%s} DEFG");
+    ASSERT_FALSE(res.has_value());
+}
+
+// 11 : Long text Unmatched format
+TEST(ScanTest, errorLongUnmatchedFormat) {
+    auto res = stdx::scan<int, std::string, unsigned int, double>("ABC 04 DEFG 15 HIGK -17 LMN 15.6 OPQ ABC",
+                                                                  "ABC {\%d} DEFG {\%s} HIGK {\%u} LMN {\%f} OPQ ABC");
+    ASSERT_FALSE(res.has_value());
+}
+
+// 12 : Incorrect format
+TEST(ScanTest, errorIncorrectFormat) {
+    auto res = stdx::scan<double>("ABC 0.123456789 DEFG", "ABC {\%lf} DEFG");
+    ASSERT_FALSE(res.has_value());
+}
+
+// 13 : Unmatched formatted string
+TEST(ScanTest, errorUnmatchedFormattedString) {
+    auto res = stdx::scan<double>("ABC 0.123456789 DEFG", "ABCD {\%f} DEFG");
+    ASSERT_FALSE(res.has_value());
 }

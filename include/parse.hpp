@@ -70,7 +70,7 @@ bool check_format(std::string_view fmt) {
 template <typename T>
 std::expected<T, scan_error> parse_value_with_format(std::string_view input, std::string_view fmt) {
     if (!check_format<T>(fmt)) {
-        return std::unexpected(scan_error{err_msg::Err_format});
+        return std::unexpected(scan_error{err_msg::Err_unmatched});
     }
     return parse_value<T>(input);
 }
@@ -98,7 +98,7 @@ parse_sources(std::string_view input, std::string_view format) {
             std::string_view between = format.substr(start, open - start);
             auto pos = input.find(between);
             if (input.size() < between.size() || pos == std::string_view::npos) {
-                return std::unexpected(scan_error{"Unformatted text in input and format string are different"});
+                return std::unexpected(scan_error{err_msg::Err_unmatched});
             }
             if (start != 0) {
                 input_parts.emplace_back(input.substr(0, pos));
@@ -117,7 +117,7 @@ parse_sources(std::string_view input, std::string_view format) {
         std::string_view remaining_format = format.substr(start);
         auto pos = input.find(remaining_format);
         if (input.size() < remaining_format.size() || pos == std::string_view::npos) {
-            return std::unexpected(scan_error{"Unformatted text in input and format string are different"});
+            return std::unexpected(scan_error{err_msg::Err_unmatched});
         }
         if (pos > 0) {
             input_parts.emplace_back(input.substr(0, pos));

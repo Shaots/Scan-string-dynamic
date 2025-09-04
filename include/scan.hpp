@@ -19,13 +19,13 @@ std::expected<std::tuple<Ts...>, details::scan_error> process(const std::vector<
         return process_single_value<T>(formats.at(Index), inputs.at(Index));
     };
     auto res = std::make_tuple(process_element.template operator()<Ts, I>()...);
-    
+
     // Look for details::scan_error type in tuple
     bool detect = true;
-    std::apply([&detect](const auto &... tupleArgs){ ((detect &= tupleArgs.has_value()), ...);},res);
-    
+    std::apply([&detect](const auto &...tupleArgs) { ((detect &= tupleArgs.has_value()), ...); }, res);
+
     if (!detect) {
-        return  std::unexpected(details::scan_error{details::err_msg::Err_exist_error});
+        return std::unexpected(details::scan_error{details::err_msg::Err_exist_error});
     }
     return std::apply([](const auto &...tupleArgs) { return std::make_tuple(tupleArgs.value()...); }, res);
 }
@@ -35,12 +35,12 @@ std::expected<details::scan_result<Ts...>, details::scan_error> scan(std::string
     details::scan_result<Ts...> res;
     auto pair_ = stdx::details::parse_sources(input, format);
     if (!pair_.has_value()) {
-        return std::unexpected(details::scan_error{details::err_msg::Err_unmatched});
+        return std::unexpected(pair_.error());
     }
 
     auto res_ = process<Ts...>(pair_->first, pair_->second, std::make_index_sequence<sizeof...(Ts)>{});
     if (!res_.has_value()) {
-        return std::unexpected(details::scan_error{details::err_msg::Err_unmatched});
+        return std::unexpected(res_.error());
     }
     res.result = *res_;
     return res;
