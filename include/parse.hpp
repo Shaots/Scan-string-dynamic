@@ -47,6 +47,9 @@ requires(std::is_same_v<T, std::string> ||
 
 template <typename T>
 bool check_format(std::string_view fmt) {
+    if (fmt.empty()) {
+        return true;
+    }
     if (fmt == "\%d") {
         return std::is_integral<T>::value;
     }
