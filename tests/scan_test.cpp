@@ -32,7 +32,7 @@ TEST(ScanTest, format) {
     EXPECT_EQ(res3.error().message, "Incorrect format");
 }
 
-// 2 : Check integral format
+// 2 : Check integral format positive and negative
 TEST(ScanTest, integralFormat) {
     std::string fmt_ = "\%d";
     std::string_view fmt(fmt_);
@@ -65,6 +65,21 @@ TEST(ScanTest, integralFormat) {
 
     auto res10 = stdx::details::parse_value_with_format<uint64_t>(std::to_string(UINT64_MAX), fmt);
     EXPECT_EQ(*res10, UINT64_MAX);
+
+    auto res11 = stdx::details::parse_value_with_format<int>(std::to_string(INT_MIN), fmt);
+    EXPECT_EQ(*res11, INT_MIN);
+
+    auto res12 = stdx::details::parse_value_with_format<int8_t>(std::to_string(INT8_MIN), fmt);
+    EXPECT_EQ(*res12, INT8_MIN);
+
+    auto res13 = stdx::details::parse_value_with_format<int16_t>(std::to_string(INT16_MIN), fmt);
+    EXPECT_EQ(*res13, INT16_MIN);
+
+    auto res14 = stdx::details::parse_value_with_format<int32_t>(std::to_string(INT32_MIN), fmt);
+    EXPECT_EQ(*res14, INT32_MIN);
+
+    auto res15 = stdx::details::parse_value_with_format<int64_t>(std::to_string(INT64_MIN), fmt);
+    EXPECT_EQ(*res15, INT64_MIN);
 }
 
 // 3 : Check float format
@@ -89,4 +104,71 @@ TEST(ScanTest, stringFormat) {
 
     auto res2 = stdx::details::parse_value_with_format<std::string_view>(input, fmt);
     EXPECT_EQ(*res2, input);
+}
+
+// ---------------------------------
+
+// 6 : Scan string
+TEST(ScanTest, scanString) {
+    auto res = stdx::scan<std::string, std::string_view, std::string_view, std::string>(
+        "ABC 04 DEFG 15 HIGK -17 LMN 15.6", "ABC {\%s} DEFG {\%s} HIGK {\%s} LMN {\%s}");
+    EXPECT_EQ(std::get<0>(res->result), "04");
+    EXPECT_EQ(std::get<1>(res->result), "15");
+    EXPECT_EQ(std::get<2>(res->result), "-17");
+    EXPECT_EQ(std::get<3>(res->result), "15.6");
+    ASSERT_TRUE(res);
+}
+
+// 7 : Scan integer signed and unsigned
+TEST(ScanTest, scanInteger) {
+    auto res = stdx::scan<int, unsigned int, int8_t, uint16_t, int32_t, uint64_t>(
+        "ABC -04 DEFG 15 HIGK -17 LMN 12345 OPQ -789654 RST 123987456",
+        "ABC {\%d} DEFG {\%u} HIGK {\%d} LMN {\%u} OPQ {\%d} RST {\%u}");
+    EXPECT_EQ(std::get<0>(res->result), -4);
+    EXPECT_EQ(std::get<1>(res->result), 15);
+    EXPECT_EQ(std::get<2>(res->result), -17);
+    EXPECT_EQ(std::get<3>(res->result), 12345);
+    EXPECT_EQ(std::get<4>(res->result), -789654);
+    EXPECT_EQ(std::get<5>(res->result), 123987456);
+    ASSERT_TRUE(res);
+}
+
+// 7 : Scan float positive and negative
+TEST(ScanTest, scanFloat) {
+    auto res = stdx::scan<double, double, double, double, float, float, float, float>(
+        "ABC 0.123456789 DEFG -0.123456789 HIGK 15 LMN -16 OPQ 0.1234 RST -0.1234 UVW 789 XYZ 101112",
+        "ABC {\%f} DEFG {\%f} HIGK {\%f} LMN {\%f} OPQ {\%f} RST {\%f} UVW {\%f} XYZ {\%f}");
+    double d_eps = 1e-10;
+    double f_eps = 1e-05;
+    EXPECT_NEAR(std::get<0>(res->result), 0.123456789, d_eps);
+    EXPECT_NEAR(std::get<1>(res->result), -0.123456789, d_eps);
+    EXPECT_NEAR(std::get<2>(res->result), 15, d_eps);
+    EXPECT_NEAR(std::get<3>(res->result), -16, d_eps);
+    EXPECT_NEAR(std::get<4>(res->result), 0.1234, f_eps);
+    EXPECT_NEAR(std::get<5>(res->result), -0.1234, f_eps);
+    EXPECT_NEAR(std::get<6>(res->result), 789, f_eps);
+    EXPECT_NEAR(std::get<7>(res->result), 101112, f_eps);
+    ASSERT_TRUE(res);
+}
+
+// 8 : Scan without placeholder
+TEST(ScanTest, scanNoPlaceholder) {
+    auto res = stdx::scan<int, int, int, double>("ABC 04 DEFG 15 HIGK -17 LMN 15.6", "ABC {} DEFG {} HIGK {} LMN {}");
+    EXPECT_EQ(std::get<0>(res->result), 04);
+    EXPECT_EQ(std::get<1>(res->result), 15);
+    EXPECT_EQ(std::get<2>(res->result), -17);
+    EXPECT_EQ(std::get<3>(res->result), 15.6);
+    ASSERT_TRUE(res);
+}
+
+// 9 : Scan mixed format
+TEST(ScanTest, scanMixed) {
+    auto res = stdx::scan<unsigned int, float, int, double, std::string>(
+        "ABC 04 DEFG 15 HIGK -17 LMN 15.6 OPQ ABC", "ABC {\%u} DEFG {} HIGK {\%d} LMN {} OPQ {\%s}");
+    EXPECT_EQ(std::get<0>(res->result), 4);
+    EXPECT_NEAR(std::get<1>(res->result), 15, 1e-05);
+    EXPECT_EQ(std::get<2>(res->result), -17);
+    EXPECT_NEAR(std::get<3>(res->result), 15.6, 1e-10);
+    EXPECT_EQ(std::get<4>(res->result), "ABC");
+    ASSERT_TRUE(res);
 }
