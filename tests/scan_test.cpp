@@ -1,5 +1,5 @@
 #include <climits>
-#include<cstdint>
+#include <cstdint>
 #include <gtest/gtest.h>
 #include <print>
 #include <string>
@@ -20,48 +20,48 @@ TEST(ScanTest, SimpleTest) {
 
 // 1 : Check format ant template type
 TEST(ScanTest, format) {
-    auto res = stdx::details::parse_value_with_format<unsigned int>("78", "\%d");
-    EXPECT_EQ(*res, 78);
+    auto res1 = stdx::details::parse_value_with_format<unsigned int>("78", "\%d");
+    EXPECT_EQ(*res1, 78);
 
-    res = stdx::details::parse_value_with_format<int>("79", "\%d");
-    EXPECT_EQ(*res, 79);
+    auto res2 = stdx::details::parse_value_with_format<int>("79", "\%d");
+    EXPECT_EQ(*res2, 79);
 
-    res = stdx::details::parse_value_with_format<int>("78.5", "\%f");
-    EXPECT_EQ(res.has_value(), false);
-    EXPECT_EQ(res.error().message, "Incorrect format");
+    auto res3 = stdx::details::parse_value_with_format<int>("78.5", "\%f");
+    EXPECT_EQ(res3.has_value(), false);
+    EXPECT_EQ(res3.error().message, "Incorrect format");
 }
 
 // 2 : Check integral format
 TEST(ScanTest, integralFormat) {
     std::string fmt_ = "\%d";
     std::string_view fmt(fmt_);
-    auto res = stdx::details::parse_value_with_format<int>(std::to_string(INT_MAX), fmt);
-    EXPECT_EQ(*res, INT_MAX);
+    auto res1 = stdx::details::parse_value_with_format<int>(std::to_string(INT_MAX), fmt);
+    EXPECT_EQ(*res1, INT_MAX);
 
-    res = stdx::details::parse_value_with_format<int8_t>(std::to_string(INT8_MAX), fmt);
-    EXPECT_EQ(*res, INT8_MAX);
+    auto res2 = stdx::details::parse_value_with_format<int8_t>(std::to_string(INT8_MAX), fmt);
+    EXPECT_EQ(*res2, INT8_MAX);
 
-    res = stdx::details::parse_value_with_format<int16_t>(std::to_string(INT16_MAX), fmt);
-    EXPECT_EQ(*res, INT16_MAX);
+    auto res3 = stdx::details::parse_value_with_format<int16_t>(std::to_string(INT16_MAX), fmt);
+    EXPECT_EQ(*res3, INT16_MAX);
 
-    res = stdx::details::parse_value_with_format<int32_t>(std::to_string(INT32_MAX), fmt);
-    EXPECT_EQ(*res, INT32_MAX);
+    auto res4 = stdx::details::parse_value_with_format<int32_t>(std::to_string(INT32_MAX), fmt);
+    EXPECT_EQ(*res4, INT32_MAX);
 
-    res = stdx::details::parse_value_with_format<int64_t>(std::to_string(INT64_MAX), fmt);
-    EXPECT_EQ(*res, INT64_MAX);
+    auto res5 = stdx::details::parse_value_with_format<int64_t>(std::to_string(INT64_MAX), fmt);
+    EXPECT_EQ(*res5, INT64_MAX);
 
-    res = stdx::details::parse_value_with_format<unsigned int>(std::to_string(UINT_MAX), fmt);
-    EXPECT_EQ(*res, UINT_MAX);
+    auto res6 = stdx::details::parse_value_with_format<unsigned int>(std::to_string(UINT_MAX), fmt);
+    EXPECT_EQ(*res6, UINT_MAX);
 
-    res = stdx::details::parse_value_with_format<uint8_t>(std::to_string(UINT8_MAX), fmt);
-    EXPECT_EQ(*res, UINT8_MAX);
+    auto res7 = stdx::details::parse_value_with_format<uint8_t>(std::to_string(UINT8_MAX), fmt);
+    EXPECT_EQ(*res7, UINT8_MAX);
 
-    res = stdx::details::parse_value_with_format<uint16_t>(std::to_string(UINT16_MAX), fmt);
-    EXPECT_EQ(*res, UINT16_MAX);
+    auto res8 = stdx::details::parse_value_with_format<uint16_t>(std::to_string(UINT16_MAX), fmt);
+    EXPECT_EQ(*res8, UINT16_MAX);
 
-    res = stdx::details::parse_value_with_format<uint32_t>(std::to_string(UINT32_MAX), fmt);
-    EXPECT_EQ(*res, UINT32_MAX);
+    auto res9 = stdx::details::parse_value_with_format<uint32_t>(std::to_string(UINT32_MAX), fmt);
+    EXPECT_EQ(*res9, UINT32_MAX);
 
-    res = stdx::details::parse_value_with_format<uint64_t>(std::to_string(UINT64_MAX), fmt);
-    EXPECT_EQ(*res, UINT64_MAX);
+    auto res10 = stdx::details::parse_value_with_format<uint64_t>(std::to_string(UINT64_MAX), fmt);
+    EXPECT_EQ(*res10, UINT64_MAX);
 }
