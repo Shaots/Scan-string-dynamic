@@ -3,6 +3,7 @@
 #include "types.hpp"
 #include <exception>
 #include <expected>
+#include <print>
 #include <string_view>
 #include <type_traits>
 #include <vector>
@@ -118,7 +119,9 @@ parse_sources(std::string_view input, std::string_view format) {
         if (input.size() < remaining_format.size() || pos == std::string_view::npos) {
             return std::unexpected(scan_error{"Unformatted text in input and format string are different"});
         }
-        input_parts.emplace_back(input.substr(0, pos));
+        if (pos > 0) {
+            input_parts.emplace_back(input.substr(0, pos));
+        }
         input = input.substr(pos + remaining_format.size());
     } else {
         input_parts.emplace_back(input);

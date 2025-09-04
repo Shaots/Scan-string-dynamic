@@ -151,8 +151,8 @@ TEST(ScanTest, scanFloat) {
     ASSERT_TRUE(res);
 }
 
-// 8 : Scan without placeholder
-TEST(ScanTest, scanNoPlaceholder) {
+// 8 : Scan without format
+TEST(ScanTest, scanNoFormat) {
     auto res = stdx::scan<int, int, int, double>("ABC 04 DEFG 15 HIGK -17 LMN 15.6", "ABC {} DEFG {} HIGK {} LMN {}");
     EXPECT_EQ(std::get<0>(res->result), 04);
     EXPECT_EQ(std::get<1>(res->result), 15);
@@ -170,5 +170,11 @@ TEST(ScanTest, scanMixed) {
     EXPECT_EQ(std::get<2>(res->result), -17);
     EXPECT_NEAR(std::get<3>(res->result), 15.6, 1e-10);
     EXPECT_EQ(std::get<4>(res->result), "ABC");
+    ASSERT_TRUE(res);
+}
+
+// 10 : Scan without placeholder
+TEST(ScanTest, scanNoPlaceholder) {
+    auto res = stdx::scan<>("ABC 04 DEFG 15 HIGK -17 LMN 15.6 OPQ ABC", "ABC 04 DEFG 15 HIGK -17 LMN 15.6 OPQ ABC");
     ASSERT_TRUE(res);
 }
