@@ -1,4 +1,5 @@
 #include <climits>
+#include <cmath>
 #include <cstdint>
 #include <gtest/gtest.h>
 #include <print>
@@ -64,4 +65,28 @@ TEST(ScanTest, integralFormat) {
 
     auto res10 = stdx::details::parse_value_with_format<uint64_t>(std::to_string(UINT64_MAX), fmt);
     EXPECT_EQ(*res10, UINT64_MAX);
+}
+
+// 3 : Check float format
+TEST(ScanTest, floatFormat) {
+    std::string fmt_ = "\%f";
+    std::string_view fmt(fmt_);
+    std::string input("3.14159265359");
+    auto res1 = stdx::details::parse_value_with_format<float>(input, fmt);
+    EXPECT_NEAR(*res1, M_PI, 1e-5);
+
+    auto res2 = stdx::details::parse_value_with_format<double>(input, fmt);
+    EXPECT_NEAR(*res2, M_PI, 1e-10);
+}
+
+// 4 : Check string format
+TEST(ScanTest, stringFormat) {
+    std::string fmt_ = "\%s";
+    std::string_view fmt(fmt_);
+    std::string input("My name is Roman");
+    auto res1 = stdx::details::parse_value_with_format<std::string>(input, fmt);
+    EXPECT_EQ(*res1, input);
+
+    auto res2 = stdx::details::parse_value_with_format<std::string_view>(input, fmt);
+    EXPECT_EQ(*res2, input);
 }
