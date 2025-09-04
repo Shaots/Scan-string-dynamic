@@ -1,4 +1,5 @@
 #pragma once
+#include <cstddef>
 #include <string>
 #include <tuple>
 namespace stdx::details {
@@ -13,8 +14,19 @@ struct scan_error {
 
 template <typename... Ts>
 struct scan_result {
+    scan_result(std::tuple<Ts...>&& res) : result(std::move(res)) {}
+
+    const std::tuple<Ts...>& value() {
+        return result;
+    }
+
+    template<size_t I>
+    constexpr auto get() {
+        return std::get<I>(result);
+    }
+
+private:
     std::tuple<Ts...> result;
-    void value();
 };
 
 namespace err_msg {

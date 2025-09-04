@@ -12,10 +12,10 @@
 TEST(ScanTest, SimpleTest) {
     auto res = stdx::scan<int, int, int, double>("ABC 04 DEFG 15 HIGK -17 LMN 15.6",
                                                  "ABC {\%d} DEFG {\%d} HIGK {\%d} LMN {\%f}");
-    EXPECT_EQ(std::get<0>(res->result), 4);
-    EXPECT_EQ(std::get<1>(res->result), 15);
-    EXPECT_EQ(std::get<2>(res->result), -17);
-    EXPECT_EQ(std::get<3>(res->result), 15.6);
+    EXPECT_EQ(res->get<0>(), 4);
+    EXPECT_EQ(res->get<1>(), 15);
+    EXPECT_EQ(res->get<2>(), -17);
+    EXPECT_EQ(res->get<3>(), 15.6);
     ASSERT_TRUE(res);
 }
 
@@ -111,10 +111,10 @@ TEST(ScanTest, stringFormat) {
 TEST(ScanTest, scanString) {
     auto res = stdx::scan<std::string, std::string_view, std::string_view, std::string>(
         "ABC 04 DEFG 15 HIGK -17 LMN 15.6", "ABC {\%s} DEFG {\%s} HIGK {\%s} LMN {\%s}");
-    EXPECT_EQ(std::get<0>(res->result), "04");
-    EXPECT_EQ(std::get<1>(res->result), "15");
-    EXPECT_EQ(std::get<2>(res->result), "-17");
-    EXPECT_EQ(std::get<3>(res->result), "15.6");
+    EXPECT_EQ(res->get<0>(), "04");
+    EXPECT_EQ(res->get<1>(), "15");
+    EXPECT_EQ(res->get<2>(), "-17");
+    EXPECT_EQ(res->get<3>(), "15.6");
     ASSERT_TRUE(res);
 }
 
@@ -123,12 +123,12 @@ TEST(ScanTest, scanInteger) {
     auto res = stdx::scan<int, unsigned int, int8_t, uint16_t, int32_t, uint64_t>(
         "ABC -04 DEFG 15 HIGK -17 LMN 12345 OPQ -789654 RST 123987456",
         "ABC {\%d} DEFG {\%u} HIGK {\%d} LMN {\%u} OPQ {\%d} RST {\%u}");
-    EXPECT_EQ(std::get<0>(res->result), -4);
-    EXPECT_EQ(std::get<1>(res->result), 15);
-    EXPECT_EQ(std::get<2>(res->result), -17);
-    EXPECT_EQ(std::get<3>(res->result), 12345);
-    EXPECT_EQ(std::get<4>(res->result), -789654);
-    EXPECT_EQ(std::get<5>(res->result), 123987456);
+    EXPECT_EQ(res->get<0>(), -4);
+    EXPECT_EQ(res->get<1>(), 15);
+    EXPECT_EQ(res->get<2>(), -17);
+    EXPECT_EQ(res->get<3>(), 12345);
+    EXPECT_EQ(res->get<4>(), -789654);
+    EXPECT_EQ(res->get<5>(), 123987456);
     ASSERT_TRUE(res);
 }
 
@@ -139,24 +139,24 @@ TEST(ScanTest, scanFloat) {
         "ABC {\%f} DEFG {\%f} HIGK {\%f} LMN {\%f} OPQ {\%f} RST {\%f} UVW {\%f} XYZ {\%f}");
     double d_eps = 1e-10;
     double f_eps = 1e-05;
-    EXPECT_NEAR(std::get<0>(res->result), 0.123456789, d_eps);
-    EXPECT_NEAR(std::get<1>(res->result), -0.123456789, d_eps);
-    EXPECT_NEAR(std::get<2>(res->result), 15, d_eps);
-    EXPECT_NEAR(std::get<3>(res->result), -16, d_eps);
-    EXPECT_NEAR(std::get<4>(res->result), 0.1234, f_eps);
-    EXPECT_NEAR(std::get<5>(res->result), -0.1234, f_eps);
-    EXPECT_NEAR(std::get<6>(res->result), 789, f_eps);
-    EXPECT_NEAR(std::get<7>(res->result), 101112, f_eps);
+    EXPECT_NEAR(res->get<0>(), 0.123456789, d_eps);
+    EXPECT_NEAR(res->get<1>(), -0.123456789, d_eps);
+    EXPECT_NEAR(res->get<2>(), 15, d_eps);
+    EXPECT_NEAR(res->get<3>(), -16, d_eps);
+    EXPECT_NEAR(res->get<4>(), 0.1234, f_eps);
+    EXPECT_NEAR(res->get<5>(), -0.1234, f_eps);
+    EXPECT_NEAR(res->get<6>(), 789, f_eps);
+    EXPECT_NEAR(res->get<7>(), 101112, f_eps);
     ASSERT_TRUE(res);
 }
 
 // 8 : Scan without format
 TEST(ScanTest, scanNoFormat) {
     auto res = stdx::scan<int, int, int, double>("ABC 04 DEFG 15 HIGK -17 LMN 15.6", "ABC {} DEFG {} HIGK {} LMN {}");
-    EXPECT_EQ(std::get<0>(res->result), 04);
-    EXPECT_EQ(std::get<1>(res->result), 15);
-    EXPECT_EQ(std::get<2>(res->result), -17);
-    EXPECT_EQ(std::get<3>(res->result), 15.6);
+    EXPECT_EQ(res->get<0>(), 4);
+    EXPECT_EQ(res->get<1>(), 15);
+    EXPECT_EQ(res->get<2>(), -17);
+    EXPECT_EQ(res->get<3>(), 15.6);
     ASSERT_TRUE(res);
 }
 
@@ -164,11 +164,11 @@ TEST(ScanTest, scanNoFormat) {
 TEST(ScanTest, scanMixed) {
     auto res = stdx::scan<unsigned int, float, int, double, std::string>(
         "ABC 04 DEFG 15 HIGK -17 LMN 15.6 OPQ ABC", "ABC {\%u} DEFG {} HIGK {\%d} LMN {} OPQ {\%s}");
-    EXPECT_EQ(std::get<0>(res->result), 4);
-    EXPECT_NEAR(std::get<1>(res->result), 15, 1e-05);
-    EXPECT_EQ(std::get<2>(res->result), -17);
-    EXPECT_NEAR(std::get<3>(res->result), 15.6, 1e-10);
-    EXPECT_EQ(std::get<4>(res->result), "ABC");
+    EXPECT_EQ(res->get<0>(), 4);
+    EXPECT_NEAR(res->get<1>(), 15, 1e-05);
+    EXPECT_EQ(res->get<2>(), -17);
+    EXPECT_NEAR(res->get<3>(), 15.6, 1e-10);
+    EXPECT_EQ(res->get<4>(), "ABC");
     ASSERT_TRUE(res);
 }
 

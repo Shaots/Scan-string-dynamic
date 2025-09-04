@@ -32,7 +32,6 @@ std::expected<std::tuple<Ts...>, details::scan_error> process(const std::vector<
 
 template <typename... Ts>
 std::expected<details::scan_result<Ts...>, details::scan_error> scan(std::string_view input, std::string_view format) {
-    details::scan_result<Ts...> res;
     auto pair_ = stdx::details::parse_sources(input, format);
     if (!pair_.has_value()) {
         return std::unexpected(pair_.error());
@@ -42,7 +41,7 @@ std::expected<details::scan_result<Ts...>, details::scan_error> scan(std::string
     if (!res_.has_value()) {
         return std::unexpected(res_.error());
     }
-    res.result = *res_;
+    details::scan_result<Ts...> res(std::move(*res_));
     return res;
 }
 
