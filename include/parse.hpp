@@ -2,7 +2,6 @@
 
 #include "types.hpp"
 #include <exception>
-#include <expected>
 #include <print>
 #include <string_view>
 #include <type_traits>
@@ -11,7 +10,7 @@
 namespace stdx::details {
 
 template <typename T>
-std::expected<T, scan_error> parse_number(std::string_view input) {
+parse_result<T> parse_number(std::string_view input) {
     T result{};
     auto [ptr, ec] = std::from_chars(input.data(), input.data() + input.size(), result);
     if (ec == std::errc::invalid_argument) {
@@ -24,25 +23,25 @@ std::expected<T, scan_error> parse_number(std::string_view input) {
 }
 
 template <typename T>
-requires(std::is_integral<T>::value &&std::is_signed<T>::value) std::expected<T, scan_error> parse_value(
+requires(std::is_integral<T>::value &&std::is_signed<T>::value) parse_result<T> parse_value(
     std::string_view input) {
     return parse_number<T>(input);
 }
 
 template <typename T>
-requires(std::is_integral<T>::value &&std::is_unsigned<T>::value) std::expected<T, scan_error> parse_value(
+requires(std::is_integral<T>::value &&std::is_unsigned<T>::value) parse_result<T> parse_value(
     std::string_view input) {
     return parse_number<T>(input);
 }
 
 template <typename T>
-requires(std::is_floating_point<T>::value) std::expected<T, scan_error> parse_value(std::string_view input) {
+requires(std::is_floating_point<T>::value) parse_result<T> parse_value(std::string_view input) {
     return parse_number<T>(input);
 }
 
 template <typename T>
 requires(std::is_same_v<T, std::string> ||
-         std::is_same_v<T, std::string_view>) std::expected<T, scan_error> parse_value(std::string_view input) {
+         std::is_same_v<T, std::string_view>) parse_result<T> parse_value(std::string_view input) {
     return T{input};
 }
 
@@ -68,7 +67,7 @@ bool check_format(std::string_view fmt) {
 }
 
 template <typename T>
-std::expected<T, scan_error> parse_value_with_format(std::string_view input, std::string_view fmt) {
+parse_result<T> parse_value_with_format(std::string_view input, std::string_view fmt) {
     if (!check_format<T>(fmt)) {
         return std::unexpected(scan_error{err_msg::Err_unmatched});
     }

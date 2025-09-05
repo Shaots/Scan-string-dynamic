@@ -1,5 +1,6 @@
 #pragma once
 #include <cstddef>
+#include <expected>
 #include <string>
 #include <tuple>
 namespace stdx::details {
@@ -9,6 +10,9 @@ namespace stdx::details {
 struct scan_error {
     std::string message;
 };
+
+template <typename T>
+using parse_result = std::expected<T, scan_error>;
 
 // Шаблонный класс для хранения результатов успешного сканирования
 
