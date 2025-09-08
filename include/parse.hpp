@@ -1,21 +1,75 @@
 #pragma once
 
-#include <expected>
-#include <string>
-#include <string_view>
-#include <utility>
-#include <vector>
-
 #include "types.hpp"
+#include <exception>
+#include <print>
+#include <string_view>
+#include <type_traits>
+#include <vector>
 
 namespace stdx::details {
 
-// здесь ваш код
-
-// Функция для парсинга значения с учетом спецификатора формата
 template <typename T>
-std::expected<T, scan_error> parse_value_with_format(std::string_view input, std::string_view fmt) {
-    // здесь ваш код
+parse_result<T> parse_number(std::string_view input) {
+    T result{};
+    auto [ptr, ec] = std::from_chars(input.data(), input.data() + input.size(), result);
+    if (ec == std::errc::invalid_argument) {
+        return std::unexpected(scan_error{err_msg::Err_invalid_arg});
+    }
+    if (ec == std::errc::result_out_of_range) {
+        return std::unexpected(scan_error{err_msg::Err_out_range});
+    }
+    return static_cast<T>(result);
+}
+
+template <typename T>
+requires(std::is_integral<T>::value &&std::is_signed<T>::value) parse_result<T> parse_value(std::string_view input) {
+    return parse_number<T>(input);
+}
+
+template <typename T>
+requires(std::is_integral<T>::value &&std::is_unsigned<T>::value) parse_result<T> parse_value(std::string_view input) {
+    return parse_number<T>(input);
+}
+
+template <typename T>
+requires(std::is_floating_point<T>::value) parse_result<T> parse_value(std::string_view input) {
+    return parse_number<T>(input);
+}
+
+template <typename T>
+requires(std::is_same_v<T, std::string> ||
+         std::is_same_v<T, std::string_view>) parse_result<T> parse_value(std::string_view input) {
+    return T{input};
+}
+
+template <typename T>
+bool check_format(std::string_view fmt) {
+    if (fmt.empty()) {
+        return true;
+    }
+    if (fmt == "\%d") {
+        return std::is_integral<T>::value;
+    }
+    if (fmt == "\%s") {
+        return std::is_same_v<T, std::string> || std::is_same_v<T, std::string_view>;
+    }
+    if (fmt == "\%u") {
+        return std::is_integral<T>::value && std::is_unsigned<T>::value;
+    }
+    if (fmt == "\%f") {
+        return std::is_floating_point<T>::value;
+    }
+
+    return false;
+}
+
+template <typename T>
+parse_result<T> parse_value_with_format(std::string_view input, std::string_view fmt) {
+    if (!check_format<T>(fmt)) {
+        return std::unexpected(scan_error{err_msg::Err_unmatched});
+    }
+    return parse_value<T>(input);
 }
 
 // Функция для проверки корректности входных данных и выделения из обеих строк интересующих данных для парсинга
@@ -41,7 +95,7 @@ parse_sources(std::string_view input, std::string_view format) {
             std::string_view between = format.substr(start, open - start);
             auto pos = input.find(between);
             if (input.size() < between.size() || pos == std::string_view::npos) {
-                return std::unexpected(scan_error{"Unformatted text in input and format string are different"});
+                return std::unexpected(scan_error{err_msg::Err_unmatched});
             }
             if (start != 0) {
                 input_parts.emplace_back(input.substr(0, pos));
@@ -60,9 +114,11 @@ parse_sources(std::string_view input, std::string_view format) {
         std::string_view remaining_format = format.substr(start);
         auto pos = input.find(remaining_format);
         if (input.size() < remaining_format.size() || pos == std::string_view::npos) {
-            return std::unexpected(scan_error{"Unformatted text in input and format string are different"});
+            return std::unexpected(scan_error{err_msg::Err_unmatched});
         }
-        input_parts.emplace_back(input.substr(0, pos));
+        if (pos > 0) {
+            input_parts.emplace_back(input.substr(0, pos));
+        }
         input = input.substr(pos + remaining_format.size());
     } else {
         input_parts.emplace_back(input);
@@ -70,4 +126,4 @@ parse_sources(std::string_view input, std::string_view format) {
     return std::pair{format_parts, input_parts};
 }
 
-} // namespace stdx::details
+}  // namespace stdx::details
