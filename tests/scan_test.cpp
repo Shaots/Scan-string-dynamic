@@ -1,5 +1,6 @@
 #include <climits>
 #include <cmath>
+#include <cstddef>
 #include <cstdint>
 #include <gtest/gtest.h>
 #include <print>
@@ -186,21 +187,27 @@ TEST(ScanTest, errorUnmatchedFormat) {
     ASSERT_FALSE(res.has_value());
 }
 
-// 11 : Long text Unmatched format
+// 12 : Long text Unmatched format
 TEST(ScanTest, errorLongUnmatchedFormat) {
     auto res = stdx::scan<int, std::string, unsigned int, double>("ABC 04 DEFG 15 HIGK -17 LMN 15.6 OPQ ABC",
                                                                   "ABC {\%d} DEFG {\%s} HIGK {\%u} LMN {\%f} OPQ ABC");
     ASSERT_FALSE(res.has_value());
 }
 
-// 12 : Incorrect format
+// 13 : Incorrect format
 TEST(ScanTest, errorIncorrectFormat) {
     auto res = stdx::scan<double>("ABC 0.123456789 DEFG", "ABC {\%lf} DEFG");
     ASSERT_FALSE(res.has_value());
 }
 
-// 13 : Unmatched formatted string
+// 14 : Unmatched formatted string
 TEST(ScanTest, errorUnmatchedFormattedString) {
     auto res = stdx::scan<double>("ABC 0.123456789 DEFG", "ABCD {\%f} DEFG");
     ASSERT_FALSE(res.has_value());
 }
+
+// ---------------------------------------
+// The following code does not compile
+
+// 15 : Byte
+// TEST(ScanTest, byte) { auto res = stdx::scan<std::byte>("ABC 1 DEFG", "ABCD {\%f} DEFG"); }

@@ -23,14 +23,12 @@ parse_result<T> parse_number(std::string_view input) {
 }
 
 template <typename T>
-requires(std::is_integral<T>::value &&std::is_signed<T>::value) parse_result<T> parse_value(
-    std::string_view input) {
+requires(std::is_integral<T>::value &&std::is_signed<T>::value) parse_result<T> parse_value(std::string_view input) {
     return parse_number<T>(input);
 }
 
 template <typename T>
-requires(std::is_integral<T>::value &&std::is_unsigned<T>::value) parse_result<T> parse_value(
-    std::string_view input) {
+requires(std::is_integral<T>::value &&std::is_unsigned<T>::value) parse_result<T> parse_value(std::string_view input) {
     return parse_number<T>(input);
 }
 
